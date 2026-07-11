@@ -1,5 +1,7 @@
 import os
 import argparse
+from tabnanny import verbose
+from urllib import response
 from dotenv import load_dotenv
 from openai import OpenAI
 def main():
@@ -39,29 +41,19 @@ def main():
         messages = messages
         
     )
+    if response.usage is None:
+        raise RuntimeError(
+        "response usage is None. please check your API key and model name."
+    )
+
     if verbose:
         print(f"User prompt: {user_prompt}")
-        print(f"Prompt tokens: {response.usage.prompt_tokens}\n"
-            f"Response tokens: {response.usage.completion_tokens}\n"
-        )
-    else:
-            #check usage is not None
-        if response.usage is not None:
-            pass
-
-            #prompt uses
-            print(
-                
-                f"Prompt tokens: {response.usage.prompt_tokens}\n"
-                f"Response tokens: {response.usage.completion_tokens}\n"
-                
-            )
-        else:
-            pass
-            raise RuntimeError("response usage is None. please " \
-            "check your API key and model name.")
+        print(f"Prompt tokens: {response.usage.prompt_tokens}")
+        print(f"Response tokens: {response.usage.completion_tokens}")
 
     print(response.choices[0].message.content)
+
+    
         
         
     
