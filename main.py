@@ -4,6 +4,7 @@ from tabnanny import verbose
 from urllib import response
 from dotenv import load_dotenv
 from openai import OpenAI
+from prompts import system_prompt
 def main():
 
     # load enviroment variables from .env file
@@ -23,8 +24,10 @@ def main():
         raise RuntimeError("no API key found. please set the OPENROUTER_API_KEY " \
         "environment variable in the .env file")
     
-
+    
     messages = [
+            {"role" : "system",
+             "content" : system_prompt},
             {"role" : "user",
              "content" : user_prompt}
         ]
