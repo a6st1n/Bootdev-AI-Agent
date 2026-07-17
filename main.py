@@ -1,10 +1,10 @@
 import os
+import json
 import argparse
-from tabnanny import verbose
-from urllib import response
 from dotenv import load_dotenv
 from openai import OpenAI
 from prompts import system_prompt
+from call_functions import available_functions_to_use
 def main():
 
     # load enviroment variables from .env file
@@ -16,6 +16,8 @@ def main():
     args = parser.parse_args()
     user_prompt = args.user_prompt
     verbose = args.verbose
+
+    
 
     
 
@@ -41,9 +43,15 @@ def main():
     response = client.chat.completions.create(
 
         model = "openrouter/free",
-        messages = messages
+        messages = messages,
+        tools = available_functions_to_use,
         
     )
+    message = response.choices[0].message
+
+   
+
+
     if response.usage is None:
         raise RuntimeError(
         "response usage is None. please check your API key and model name."
@@ -54,7 +62,12 @@ def main():
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
         print(f"Response tokens: {response.usage.completion_tokens}")
 
-    print(response.choices[0].message.content)
+    if message.tool_calls:
+        for tool_call in message.tool_calls:
+            function_args = json.loads(tool_call.function.arguments or "{}")
+            print(f"Calling function: {tool_call.function.name}({function_args})")
+    else:
+        print(message.content)
 
     
         
