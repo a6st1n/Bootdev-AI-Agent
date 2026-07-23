@@ -24,3 +24,25 @@ def write_file(working_directory:str,file_path:str, content:str):
     
             
 
+
+schema_write_file = {
+    "type": "function",
+    "function": {
+        "name": "write_file",
+        "description": "writes data to a selected file",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "file_path": {
+                    "type": "string",
+                    "description": "where the file passed to the function is located",
+                },
+                "content":{
+                    "type": "string",
+                    "description": "what is meant to be written in the specified file"
+                }
+            },
+            "required": ["file_path","content"]
+        },
+    },
+    }

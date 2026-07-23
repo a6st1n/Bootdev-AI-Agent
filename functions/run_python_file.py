@@ -38,15 +38,23 @@ schema_run_python_file = {
     "type": "function",
     "function": {
         "name": "run_python_file",
-        "description": "runs tests on specified files",
+        "description": "runs any python file inside the working directory",
         "parameters": {
             "type": "object",
             "properties": {
-                "directory": {
+                "file_path": {
                     "type": "string",
-                    "description": "Directory path to list files from, relative to the working directory (default is the working directory itself)",
+                    "description": "where the file passed to the function is located",
                 },
+                "args":{
+                    "type": "array",
+                    "items":{
+                        "type": "string"
+                    },
+                    "description": "optional CL arguments passed to the python file before running"
+                }
             },
+            "required": ["file_path"]
         },
     },
     }
