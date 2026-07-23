@@ -4,7 +4,7 @@ import argparse
 from dotenv import load_dotenv
 from openai import OpenAI
 from prompts import system_prompt
-from call_functions import available_functions_to_use
+from call_functions import available_functions_to_use, call_functions
 def main():
 
     # load enviroment variables from .env file
@@ -16,24 +16,25 @@ def main():
     args = parser.parse_args()
     user_prompt = args.user_prompt
     verbose = args.verbose
-
     
-
-    
-
 
     if api_key == None:
+
         raise RuntimeError("no API key found. please set the OPENROUTER_API_KEY " \
         "environment variable in the .env file")
     
+
+   
     
     messages = [
+
             {"role" : "system",
              "content" : system_prompt},
             {"role" : "user",
              "content" : user_prompt}
         ]
     client = OpenAI(
+
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
@@ -53,19 +54,35 @@ def main():
 
 
     if response.usage is None:
+
         raise RuntimeError(
         "response usage is None. please check your API key and model name."
     )
 
     if verbose:
+
         print(f"User prompt: {user_prompt}")
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
         print(f"Response tokens: {response.usage.completion_tokens}")
 
+
+    
+    
+
     if message.tool_calls:
+
         for tool_call in message.tool_calls:
-            function_args = json.loads(tool_call.function.arguments or "{}")
-            print(f"Calling function: {tool_call.function.name}({function_args})")
+
+            #result from call_functions
+            result_message = call_functions(tool_call,verbose)
+
+            if result_message["content"]== "":
+                raise Exception(f"Exception raised because of {tool_call}") 
+            
+            if verbose:
+                print(f"-> {result_message['content']}")
+
+
     else:
         print(message.content)
 
