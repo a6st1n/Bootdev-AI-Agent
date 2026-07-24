@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import argparse
 from dotenv import load_dotenv
@@ -16,8 +17,8 @@ def main():
     args = parser.parse_args()
     user_prompt = args.user_prompt
     verbose = args.verbose
+    max_tokens = 20
     
-
     if api_key == None:
 
         raise RuntimeError("no API key found. please set the OPENROUTER_API_KEY " \
@@ -40,51 +41,58 @@ def main():
     )
     
     
+    for _ in range(max_tokens):
 
-    response = client.chat.completions.create(
+        response = client.chat.completions.create(
 
-        model = "openrouter/free",
-        messages = messages,
-        tools = available_functions_to_use,
-        
-    )
-    message = response.choices[0].message
-
-   
-
-
-    if response.usage is None:
-
-        raise RuntimeError(
-        "response usage is None. please check your API key and model name."
-    )
-
-    if verbose:
-
-        print(f"User prompt: {user_prompt}")
-        print(f"Prompt tokens: {response.usage.prompt_tokens}")
-        print(f"Response tokens: {response.usage.completion_tokens}")
-
-
-    
-    
-
-    if message.tool_calls:
-
-        for tool_call in message.tool_calls:
-
-            #result from call_functions
-            result_message = call_functions(tool_call,verbose)
-
-            if result_message["content"]== "":
-                raise Exception(f"Exception raised because of {tool_call}") 
+            model = "openrouter/free",
+            messages = messages,
+            tools = available_functions_to_use,
             
-            if verbose:
-                print(f"-> {result_message['content']}")
+        )
+        message = response.choices[0].message
+        messages.append(message)
+
+    
 
 
-    else:
-        print(message.content)
+        if response.usage is None:
+
+            raise RuntimeError(
+            "response usage is None. please check your API key and model name."
+        )
+
+        if verbose:
+
+            print(f"User prompt: {user_prompt}")
+            print(f"Prompt tokens: {response.usage.prompt_tokens}")
+            print(f"Response tokens: {response.usage.completion_tokens}")
+
+
+
+
+
+        if message.tool_calls:
+
+            for tool_call in message.tool_calls:
+
+                #result from call_functions
+                result_message = call_functions(tool_call,verbose)
+
+                if result_message["content"]== "":
+                    raise Exception(f"Exception raised because of {tool_call}") 
+                
+                if verbose:
+                    print(f"-> {result_message['content']}")
+
+                messages.append(result_message)
+
+        else:
+            print(message.content)
+            return
+    
+    print(f"All tokens from {max_tokens} have been used, stopping agent with exit code '1'" )
+    sys.exit(1) 
 
     
         
